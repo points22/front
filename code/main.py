@@ -1,5 +1,6 @@
-from flask import Flask, request, make_response
+from flask import Flask, request, jsonify, abort
 from pymongo import MongoClient
+from bson import ObjectId
 from os import getenv
 import json
 import sys
@@ -7,43 +8,63 @@ from flask_cors import CORS, cross_origin
 import smtplib, ssl
 from email.message import EmailMessage
 from numpy.random import randint, seed
-from datetime import datetime
+import time
 
-seed(int(datetime.now().timestamp()))
+seed(int(time.time()))
 
 client = MongoClient(host=getenv('DB_HOST', 'localhost'), port=27017)
 db = client.notesdb
 
 app = Flask(__name__)
 
-API_DOMAIN = getenv('API_DOMAIN', None)
-CORS_ORIGIN = getenv('CORS_ORIGIN', '*')
+API_DOMAIN = getenv('API_DOMAIN', '127.0.0.1:5000')
+CORS_ORIGIN = getenv('CORS_ORIGIN', 'http://127.0.0.1:80/')
 
-cors = CORS(app, origins=CORS_ORIGIN, supports_credentials=True)
-app.config['CORS_HEADERS'] = 'Content-Type'
+CORS(app, origins=[CORS_ORIGIN, "http://127.0.0.1:8888/"], supports_credentials=True)
+app.config['CORS_HEADERS'] = 'Content-Type, Cookie'
+
+@app.after_request
+def add_cors_headers(response):
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    return response
 
 @app.route('/point/create')
 @cross_origin()
 def create_point():
+    if '_id' not in request.cookies:
+        print('ERR: no _id cookie in create_point', file=sys.stderr)
+        return abort(403)
+
     note = {
         'x': int(request.args.get('x', '0')),
         'y': int(request.args.get('y', '0')),
         'text': request.args.get('text', 'null'),
+        'user_id': ObjectId(request.cookies['_id']),
     }
     result = db.points.insert_one(note)
     note['_id'] = str(result.inserted_id)
-    return json.dumps(note)
+    note['user_id'] = str(note['user_id'])
+    return jsonify(note)
 
 @app.route('/point')
 @cross_origin()
 def get_points():
+    if '_id' not in request.cookies:
+        print('ERR: no _id cookie in get_points', file=sys.stderr)
+        return jsonify([])
+
+    user_id_filter = {
+        'user_id': ObjectId(request.cookies['_id']),
+    }
+
     res = list({
         'x': p['x'],
         'y': p['y'],
         'text': p['text'],
         '_id': str(p.get('_id')),
-    } for p in db.points.find())
-    return json.dumps(res)
+    } for p in db.points.find(user_id_filter))
+
+    return jsonify(res)
 
 @app.route('/auth_check')
 @cross_origin()
@@ -52,7 +73,8 @@ def auth_check():
     res = {"result": False}
     if  '_auth' in request.cookies and '_email' in request.cookies and '_id' in request.cookies:
         res["result"] = True
-    return json.dumps(res)
+
+    return jsonify(res)
 
 @app.route('/auth_start')
 @cross_origin()
@@ -65,32 +87,28 @@ def auth_start():
     email = email.lower().strip()
     if not email or not '@' in email:
         print('ERR: invalid email', email, '.', file=sys.stderr)
-        return json.dumps(res)
+        return jsonify(res)
 
     user = db.users.find_one({'email': email})
+    code = str(randint(1000, 9999))
 
-    if not user:
-        user = {"email": email, "code": str(randint(111, 999))}
+    if user:
+        print('Update user _id %s with code %s' % (user['_id'], code), file=sys.stderr)
+        result = db.users.update({'_id': user['_id']}, {'$set': {'code': code}}, upsert=False)
+        print(result, file=sys.stderr)
+    else:
+        user = {"email": email, "code": code}
         result = db.users.insert_one(user)
         user["_id"] = result.inserted_id
-    elif not user['code']:
-        user['code'] = str(randint(111, 999))
-        db.ProductData.update_one({
-          '_id': user['_id']
-        },{
-          '$set': {
-            'code': user['code']
-          }
-        }, upsert=False)
 
     print('Sending email to', email, file=sys.stderr)
-    send_email(email, "Your auth code: %s" % user['code'])
+    send_email(email, "Your auth code: %s" % code)
 
     res['result'] = True
-    resp = make_response(json.dumps(res))
+
+    resp = jsonify(res)
     resp.set_cookie('_email', user['email'], domain=API_DOMAIN)
     resp.set_cookie('_id', str(user['_id']), domain=API_DOMAIN)
-
     return resp
 
 @app.route('/auth_finish')
@@ -104,20 +122,28 @@ def auth_finish():
     if not '_email' in request.cookies:
         print('ERR: no cookie _email set', file=sys.stderr)
 
+    if not code:
+        print('ERR: code is empty', file=sys.stderr)
+
     code = code.lower().strip()
     if not code:
         print('ERR: NO code', file=sys.stderr)
-        return json.dumps(res)
+        return jsonify(res)
 
     email = request.cookies.get('_email', 'err')
-    code = request.args.get('code', 'err')
-    user = db.users.find_one({'email': email, 'code': code})
+    user = db.users.find_one({'email': email})
     if not user:
-        print('ERR: auth: user not found with email/code: %s/%s' % (email, code), file=sys.stderr)
-        return json.dumps(res)
+        print('ERR: auth: user not found with email: %s' % email, file=sys.stderr)
+        return jsonify(res)
+
+    if user['code'] != code:
+        print('ERR: code mistmatch: expected %s, not %s' % (user['code'], code), file=sys.stderr)
+        return jsonify(res)
+
+    print('AUTH SUCCESS for ID %s email %s code %s' % (str(user['_id']), email, code), file=sys.stderr)
 
     res['result'] = True
-    resp = make_response(json.dumps(res))
+    resp = jsonify(res)
     resp.set_cookie('_auth', 'ok', domain=API_DOMAIN)
     return resp
 
@@ -142,7 +168,7 @@ def send_email(email, text):
             smtp.login(gmail_user, gmail_password)
             smtp.send_message(msg)
 
-        print('Email sent to', email, file=sys.stderr)
+        print('Email sent to', email, text, file=sys.stderr)
 
     except BaseException as e:
         print("an error has occurred in send_email: %s" % e, file=sys.stderr)
