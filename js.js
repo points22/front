@@ -1,7 +1,7 @@
 let pointerId = 0;
 
 function getPoints(callback) {
-	jQuery.get( "http://localhost:5000/point", function( data ) {
+	jQuery.get( "http://134.209.94.67:5000/point", function( data ) {
 	  console.log({
 			response: data,
 		});
@@ -11,11 +11,41 @@ function getPoints(callback) {
 }
 
 function createPoint(point) {
-	jQuery.get(`http://localhost:5000/point/create?x=${point.x}&y=${point.y}&text=${point.text}`, function( data ) {
+	jQuery.get(`http://134.209.94.67:5000/point/create?x=${point.x}&y=${point.y}&text=${point.text}`, function( data ) {
 	  console.log({
 			response: data,
 		});
 	});
+}
+
+function auth_check(callback) {
+	jQuery.get( "http://134.209.94.67:5000/auth_check", function( data ) {
+	  console.log({
+			response: data,
+		});
+		data = JSON.parse(data);
+		callback(data.result);
+	})
+}
+
+function auth_start(email, callback) {
+	jQuery.get( "http://134.209.94.67:5000/auth_start?email=" + email, function( data ) {
+	  console.log({
+			response: data,
+		});
+		data = JSON.parse(data);
+		callback(data.result);
+	})
+}
+
+function auth_finish(code, callback) {
+	jQuery.get( "http://134.209.94.67:5000/auth_finish?code=" + code, function( data ) {
+	  console.log({
+			response: data,
+		});
+		data = JSON.parse(data);
+		callback(data.result);
+	})
 }
 
 var newPoint = {x: 0, y: 0, text: null, pointerId: 0};
@@ -78,7 +108,7 @@ $('body').on('click', '.pointer', function(e){
 	// $(this).css('opacity', '0.2');
 });
 
-$(document).ready(function() {
+function load_points() {
 	getPoints(function(arr) {
 		arr.forEach(function(p) {
 			console.log(p);
@@ -87,4 +117,35 @@ $(document).ready(function() {
 		pointerId++;
 		console.log('loaded points');
 	});
+}
+
+$(document).ready(function() {
+
+		auth_check(function(has_auth) {
+			if(has_auth) {
+				load_points();
+				return;
+			}
+
+			let email = prompt('Enter your email');
+			auth_start(email, function(started_auth) {
+				if(!started_auth) {
+					alert('ERROR starting auth');
+					return
+				}
+
+				let code = prompt('Check your email. Enter the code below!');
+				auth_finish(code, function(auth_success) {
+					if(auth_success) {
+						console.log('auth_success')
+						load_points();
+						return;
+					}
+					alert('ERROR finishing auth');
+					return;
+				});
+			});
+		});
+
+
 });
