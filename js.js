@@ -19,33 +19,6 @@ function createPoint(point) {
 	});
 }
 
-function auth_check(callback) {
-	jQuery.get(api + "/auth_check", function( data ) {
-	  console.log({
-			response: data,
-		});
-		callback(data.result);
-	})
-}
-
-function auth_start(email, callback) {
-	jQuery.get(api + "/auth_start?email=" + email, function( data ) {
-	  console.log({
-			response: data,
-		});
-		callback(data.result);
-	})
-}
-
-function auth_finish(code, callback) {
-	jQuery.get(api + "/auth_finish?code=" + code, function( data ) {
-	  console.log({
-			response: data,
-		});
-		callback(data.result);
-	})
-}
-
 var newPoint = {x: 0, y: 0, text: null, pointerId: 0};
 
 function drawPoint(xPos, yPos, text) {
@@ -147,3 +120,32 @@ $(document).ready(function() {
 	});
 
 });
+
+function auth_check(callback) {
+	console.log("auth_check: " + api);
+
+	jQuery.get(api + "/auth_check", function( data ) {
+	  console.log({response: data});
+	}).fail(function() {
+    if(confirm('Error: cannot contact the server. Retry?'))
+			auth_check(callback);
+	});
+}
+
+function auth_start(email, callback) {
+	jQuery.get(api + "/auth_start?email=" + email, function( data ) {
+	  console.log({
+			response: data,
+		});
+		callback(data.result);
+	})
+}
+
+function auth_finish(code, callback) {
+	jQuery.get(api + "/auth_finish?code=" + code, function( data ) {
+	  console.log({
+			response: data,
+		});
+		callback(data.result);
+	})
+}
