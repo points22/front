@@ -1,21 +1,34 @@
-let pointerId = 0;
-
-let api = "http://pointsdb.lovemail.life:5000";
+let pointerId = 0,
+		API_HOST = "http://pointsdb.lovemail.life:5000",
+		S_REQUEST_ERROR = 'Communication error. Retry?';
 
 function getPoints(callback) {
-	jQuery.get(api + "/point", function( data ) {
-	  console.log({
-			response: data,
-		});
-		callback(data);
-	})
+	let url = API_HOST + `/point`;
+	let retry = function() { getPoints(callback); }
+
+	console.log(url);
+	jQuery.get(url, function( data ) {
+	  console.log({response: data});
+		if(callback)
+			callback(data);
+	}).fail(function() {
+    if(confirm(S_REQUEST_ERROR))
+			retry();
+	});
 }
 
-function createPoint(point) {
-	jQuery.get(api + `/point/create?x=${point.x}&y=${point.y}&text=${point.text}`, function( data ) {
-	  console.log({
-			response: data,
-		});
+function createPoint(point, callback) {
+	let url = API_HOST + `/point/create?x=${point.x}&y=${point.y}&text=${point.text}`;
+	let retry = function() { createPoint(point); }
+
+	console.log(url);
+	jQuery.get(url, function( data ) {
+	  console.log({response: data});
+		if(callback)
+			callback(data);
+	}).fail(function() {
+    if(confirm(S_REQUEST_ERROR))
+			retry();
 	});
 }
 
@@ -126,30 +139,46 @@ $(document).ready(function() {
 });
 
 function auth_check(callback) {
-	console.log("auth_check: " + api);
+	let url = API_HOST + `/auth_check`;
+	let retry = function() { auth_check(callback); }
 
-	jQuery.get(api + "/auth_check", function( data ) {
+	console.log(url);
+	jQuery.get(url, function( data ) {
 	  console.log({response: data});
+		if(callback)
+			callback(data);
 	}).fail(function() {
-    if(confirm('Error: cannot contact the server. Retry?'))
-			auth_check(callback);
+    if(confirm(S_REQUEST_ERROR))
+			retry();
 	});
 }
 
 function auth_start(email, callback) {
-	jQuery.get(api + "/auth_start?email=" + email, function( data ) {
-	  console.log({
-			response: data,
-		});
-		callback(data.result);
-	})
+	let url = API_HOST + `/auth_start?email=${email}`;
+	let retry = function() { auth_start(email, callback); }
+
+	console.log(url);
+	jQuery.get(url, function( data ) {
+	  console.log({response: data});
+		if(callback)
+			callback(data);
+	}).fail(function() {
+    if(confirm(S_REQUEST_ERROR))
+			retry();
+	});
 }
 
 function auth_finish(code, callback) {
-	jQuery.get(api + "/auth_finish?code=" + code, function( data ) {
-	  console.log({
-			response: data,
-		});
-		callback(data.result);
-	})
+	let url = API_HOST + `/auth_finish?code=${code}`;
+	let retry = function() { auth_finish(code, callback); }
+
+	console.log(url);
+	jQuery.get(url, function( data ) {
+	  console.log({response: data});
+		if(callback)
+			callback(data);
+	}).fail(function() {
+    if(confirm(S_REQUEST_ERROR))
+			retry();
+	});
 }
