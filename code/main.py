@@ -17,11 +17,11 @@ db = client.notesdb
 
 app = Flask(__name__)
 
-API_DOMAIN = getenv('API_DOMAIN', '127.0.0.1:5000')
-CORS_ORIGIN = getenv('CORS_ORIGIN', 'http://127.0.0.1:80/')
-
-CORS(app, origins=[CORS_ORIGIN, "http://127.0.0.1:8888/"], supports_credentials=True)
-app.config['CORS_HEADERS'] = 'Content-Type, Cookie'
+COOKIE_DOMAIN = getenv('COOKIE_DOMAIN', '127.0.0.1:5000')
+# CORS_ORIGIN = getenv('CORS_ORIGIN', 'http://127.1.0.1:8888/')
+#
+# CORS(app, origins=CORS_ORIGIN, supports_credentials=True, allow_headers=['Content-Type', 'Cookie'])
+# app.config['CORS_HEADERS'] = 'Content-Type, Cookie'
 
 @app.after_request
 def add_cors_headers(response):
@@ -35,9 +35,15 @@ def create_point():
         print('ERR: no _id cookie in create_point', file=sys.stderr)
         return abort(403)
 
+    x = request.args.get('x', '0')
+    y = request.args.get('y', '0')
+    if x == 0 or y == 0:
+        print('ERR: zero x or y point', file=sys.stderr)
+        return abort(400)
+
     note = {
-        'x': int(request.args.get('x', '0')),
-        'y': int(request.args.get('y', '0')),
+        'x': int(x),
+        'y': int(y),
         'text': request.args.get('text', 'null'),
         'user_id': ObjectId(request.cookies['_id']),
     }
@@ -57,14 +63,40 @@ def get_points():
         'user_id': ObjectId(request.cookies['_id']),
     }
 
-    res = list({
+    limit = int(request.args.get('limit', '100'))
+    offset = int(request.args.get('offset', '0'))
+    total = db.points.count(user_id_filter)
+
+    points = list({
         'x': p['x'],
         'y': p['y'],
         'text': p['text'],
         '_id': str(p.get('_id')),
-    } for p in db.points.find(user_id_filter))
+    } for p in db.points.find(user_id_filter).limit(limit).skip(offset))
 
-    return jsonify(res)
+    return jsonify({
+        'points': points,
+        'more': len(points) < total,
+        'result': True,
+    })
+
+@app.route('/point/delete')
+@cross_origin()
+def delete_point():
+    if '_id' not in request.cookies:
+        print('ERR: no _id cookie in get_points', file=sys.stderr)
+        return jsonify([])
+
+    filters = {
+        'user_id': ObjectId(request.cookies['_id']),
+        '_id': ObjectId(request.args.get('id', '0')),
+    }
+
+    d = db.points.delete_one(filters)
+
+    return jsonify({
+        'result': d.deleted_count > 0
+    })
 
 @app.route('/auth_check')
 @cross_origin()
@@ -107,8 +139,8 @@ def auth_start():
     res['result'] = True
 
     resp = jsonify(res)
-    resp.set_cookie('_email', user['email'], domain=API_DOMAIN)
-    resp.set_cookie('_id', str(user['_id']), domain=API_DOMAIN)
+    resp.set_cookie('_email', user['email'], domain=COOKIE_DOMAIN)
+    resp.set_cookie('_id', str(user['_id']), domain=COOKIE_DOMAIN)
     return resp
 
 @app.route('/auth_finish')
@@ -144,7 +176,7 @@ def auth_finish():
 
     res['result'] = True
     resp = jsonify(res)
-    resp.set_cookie('_auth', 'ok', domain=API_DOMAIN)
+    resp.set_cookie('_auth', 'ok', domain=COOKIE_DOMAIN)
     return resp
 
 def send_email(email, text):

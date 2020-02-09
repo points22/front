@@ -8,6 +8,7 @@ services:
     build:
       context: .
     image: egorappweb
+    restart: on-failure
     ports:
       - "5000:5000"
     volumes:
@@ -19,9 +20,32 @@ services:
     environment:
       DB_HOST: mongo
       PORT: 5000
+      COOKIE_DOMAIN: pointsdb.lovemail.life
+      CORS_ORIGIN: http://lovemail.life:80
     restart: unless-stopped
+
   mongo:
     image: mongo
     volumes:
       - mongo_db:/data/db
-    restart: unless-stopped
+    restart: on-failure
+
+  nginx:
+    image: nginx:1.15-alpine
+    restart: on-failure
+    ports:
+      - "0.0.0.0:80:80"
+      - "0.0.0.0:443:443"
+    volumes:
+      - ./data/nginx:/etc/nginx/conf.d
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+
+  certbot:
+    restart: on-failure
+    image: certbot/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    volumes:
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
