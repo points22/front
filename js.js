@@ -126,6 +126,9 @@ $('body').click(function (e) {
 $('body').on('blur', 'textarea',function(e) {
 	let text = $(this)
 	// $('#point-' + (newPoint.pointerId - 1) + ' textarea').trigger('blur');
+	if (text === '') {
+		return ;
+	}
 	newPoint.text = text.val();
 	console.log(newPoint);
 	createPoint(newPoint);
