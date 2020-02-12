@@ -83,17 +83,17 @@ function drawPoint(xPos, yPos, text) {
 	$('#point-' + pointerId).css('left', xPos + 'px');
 	$('#point-' + pointerId).css('top', yPos + 'px');
 	$('#point-' + pointerId + ' textarea').trigger('focus');
-		if ($('.pointer').length > 5) {
+		// if ($('.pointer').length > 5) {
 
-	$('.pointer').each(function(){
-		let opacity = parseFloat($(this).css('opacity'));
-		opacity -= 0.1;		if (opacity <= 0) {
-			$(this).remove();
-		} else {
-			$(this).css('opacity', opacity);
-		}
-	});
-		}
+	// $('.pointer').each(function(){
+	// 	let opacity = parseFloat($(this).css('opacity'));
+	// 	opacity -= 0.1;		if (opacity <= 0) {
+	// 		$(this).remove();
+	// 	} else {
+	// 		$(this).css('opacity', opacity);
+	// 	}
+	// });
+		// }
 
 	$('#point-' + pointerId + ' textarea').val(text);
 	pointerId++;}
@@ -113,17 +113,23 @@ $('body').click(function (e) {
 	pointerId++;
 });
 
-$('body').on('keypress',function(e) {
-  if(e.which == 13) {
-		let text = $('#point-' + (newPoint.pointerId - 1) + ' textarea');
-		$('#point-' + (newPoint.pointerId - 1) + ' textarea').trigger('blur');
-		newPoint.text = text.val();
-		console.log(newPoint);
-		createPoint(newPoint);
-  }
+// $('body').on('keypress',function(e) {
+//   if(e.which == 13) {
+// 		let text = $('#point-' + (newPoint.pointerId - 1) + ' textarea');
+// 		$('#point-' + (newPoint.pointerId - 1) + ' textarea').trigger('blur');
+// 		newPoint.text = text.val();
+// 		console.log(newPoint);
+// 		createPoint(newPoint);
+//   }
+// });
+
+$('body').on('blur', 'textarea',function(e) {
+	let text = $(this)
+	// $('#point-' + (newPoint.pointerId - 1) + ' textarea').trigger('blur');
+	newPoint.text = text.val();
+	console.log(newPoint);
+	createPoint(newPoint);
 });
-
-
 
 $('body').on('click', '.pointer', function(e){
 	e.stopPropagation();
