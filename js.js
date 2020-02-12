@@ -96,7 +96,7 @@ function drawPoint(xPos, yPos, text) {
 		// }
 
 	$('#point-' + pointerId + ' textarea').val(text);
-	pointerId++;}
+	}
 
 $('body').click(function (e) {
 	if ($('.pointer').has(e.target).length !== 0) {
