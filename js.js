@@ -29,16 +29,6 @@ function get(path, query, callback) {
     if(confirm('Communication error. Retry?'))
 			retry();
 	});
-}
-
-function getPoints(callback, offset, limit) {
-	query = {}
-	if(offset) {
-		query.offset = offset
-	}
-	if(limit) {
-		query.limit = limit
-	}
 	$('body').on('blur', 'textarea',function(e) {
 		let text = $(this)
 		// $('#point-' + (newPoint.pointerId - 1) + ' textarea').trigger('blur');
@@ -49,6 +39,16 @@ function getPoints(callback, offset, limit) {
 		console.log(newPoint);
 		createPoint(newPoint);
 	});
+}
+
+function getPoints(callback, offset, limit) {
+	query = {}
+	if(offset) {
+		query.offset = offset
+	}
+	if(limit) {
+		query.limit = limit
+	}
 	return get(`/point`, query, callback);
 }
 
