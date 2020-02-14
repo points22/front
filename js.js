@@ -80,6 +80,9 @@ function drawPoint(xPos, yPos, text) {
 		$('#point-' + pointerId).addClass('vertical');
 		// $('#point-' + pointerId).css('transform', 'rotate(-90deg)');
 	}
+	if (yPos + 100 > $(window).height()) {
+		yPos -= 100;
+	}
 	$('#point-' + pointerId).css('left', xPos + 'px');
 	$('#point-' + pointerId).css('top', yPos + 'px');
 	$('#point-' + pointerId + ' textarea').trigger('focus');
@@ -113,15 +116,15 @@ $('body').click(function (e) {
 
 });
 
-// $('body').on('keypress',function(e) {
-//   if(e.which == 13) {
-// 		let text = $('#point-' + (newPoint.pointerId - 1) + ' textarea');
-// 		$('#point-' + (newPoint.pointerId - 1) + ' textarea').trigger('blur');
-// 		newPoint.text = text.val();
-// 		console.log(newPoint);
-// 		createPoint(newPoint);
-//   }
-// });
+$('body').on('keypress',function(e) {
+	let text = $('#point-' + (newPoint.pointerId - 1) + ' textarea');
+  if(e.which == 13) {
+		$('#point-' + (newPoint.pointerId - 1) + ' textarea').trigger('blur');
+		newPoint.text = text.val();
+		console.log(newPoint);
+		createPoint(newPoint);
+  }
+});
 
 $('body').on('click', 'textarea', function(e){
 	e.stopPropagation();
