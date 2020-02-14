@@ -74,10 +74,10 @@ function drawPoint(xPos, yPos, text) {
 	$('body').append('<div id="point-'+pointerId+'" class="pointer"><div class="pointer-in-circle"><textarea maxlength="140" rows="1"></textarea></div></div>');
 	if (xPos + 100 > $(window).width()){
 		// $('#point-' + pointerId).css('transform', 'rotate(90deg)');
-		$('#point-' + pointerId).addClass('vertical');
+		// $('#point-' + pointerId).addClass('vertical');
 	}
 	if (xPos - 100 < 0) {
-		$('#point-' + pointerId).addClass('vertical');
+		// $('#point-' + pointerId).addClass('vertical');
 		// $('#point-' + pointerId).css('transform', 'rotate(-90deg)');
 	}
 	if (yPos + 100 > $(window).height()) {
