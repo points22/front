@@ -176,7 +176,7 @@ $(document).ready(function() {
 
 	auth_check(function(data) {
 		if(data.result) {
-			alert(`Hello! Click OK to load your points`);
+			//alert(`Hello! Click OK to load your points`);
 			load_points();
 			return;
 		}
