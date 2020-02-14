@@ -73,6 +73,7 @@ function drawPoint(xPos, yPos, text) {
 	// $(this).append('<div id="point-'+pointerId+'" class="pointer"><div class="pointer-in-circle"><input type="text"/></div></div>');
 	$('body').append('<div id="point-'+pointerId+'" class="pointer"><div class="pointer-in-circle"><textarea maxlength="140" rows="1"></textarea></div></div>');
 	if (xPos + 100 > $(window).width()){
+		xPos = $(window).width() - 100;
 		// $('#point-' + pointerId).css('transform', 'rotate(90deg)');
 		// $('#point-' + pointerId).addClass('vertical');
 	}
@@ -116,15 +117,15 @@ $('body').click(function (e) {
 
 });
 
-$('body').on('keypress',function(e) {
-	let text = $('#point-' + (newPoint.pointerId - 1) + ' textarea');
-  if(e.which == 13) {
-		$('#point-' + (newPoint.pointerId - 1) + ' textarea').trigger('blur');
-		newPoint.text = text.val();
-		console.log(newPoint);
-		createPoint(newPoint);
-  }
-});
+// $('body').on('keypress',function(e) {
+// 	let text = $('#point-' + (newPoint.pointerId - 1) + ' textarea');
+//   if(e.which == 13) {
+// 		$('#point-' + (newPoint.pointerId - 1) + ' textarea').trigger('blur');
+// 		newPoint.text = text.val();
+// 		console.log(newPoint);
+// 		createPoint(newPoint);
+//   }
+// });
 
 $('body').on('click', 'textarea', function(e){
 	e.stopPropagation();
