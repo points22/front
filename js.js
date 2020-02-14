@@ -29,16 +29,6 @@ function get(path, query, callback) {
     if(confirm('Communication error. Retry?'))
 			retry();
 	});
-	$('body').on('blur', 'textarea',function(e) {
-		let text = $(this)
-		// $('#point-' + (newPoint.pointerId - 1) + ' textarea').trigger('blur');
-		if (text.val() === '') {
-			return ;
-		}
-		newPoint.text = text.val();
-		console.log(newPoint);
-		createPoint(newPoint);
-	});
 }
 
 function getPoints(callback, offset, limit) {
@@ -149,6 +139,16 @@ function load_points() {
 		});
 		pointerId++;
 		console.log('loaded points');
+	$('body').on('blur', 'textarea',function(e) {
+		let text = $(this)
+		// $('#point-' + (newPoint.pointerId - 1) + ' textarea').trigger('blur');
+		if (text.val() === '') {
+			return ;
+		}
+		newPoint.text = text.val();
+		console.log(newPoint);
+		createPoint(newPoint);
+	});
 	}
 
 	loader = function(data) {
