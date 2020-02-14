@@ -113,15 +113,15 @@ $('body').click(function (e) {
 
 });
 
-// $('body').on('keypress',function(e) {
-//   if(e.which == 13) {
-// 		let text = $('#point-' + (newPoint.pointerId - 1) + ' textarea');
-// 		$('#point-' + (newPoint.pointerId - 1) + ' textarea').trigger('blur');
-// 		newPoint.text = text.val();
-// 		console.log(newPoint);
-// 		createPoint(newPoint);
-//   }
-// });
+$('body').on('keypress',function(e) {
+  if(e.which == 13) {
+		let text = $('#point-' + (newPoint.pointerId - 1) + ' textarea');
+		$('#point-' + (newPoint.pointerId - 1) + ' textarea').trigger('blur');
+		newPoint.text = text.val();
+		console.log(newPoint);
+		createPoint(newPoint);
+  }
+});
 
 
 
