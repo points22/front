@@ -149,6 +149,7 @@ function load_points() {
 		let text = $(this)
 		// $('#point-' + (newPoint.pointerId - 1) + ' textarea').trigger('blur');
 		if (text.val() === '') {
+			$(this).remove();
 			return ;
 		}
 		newPoint.text = text.val();
