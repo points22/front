@@ -150,6 +150,7 @@ function load_points() {
 		// $('#point-' + (newPoint.pointerId - 1) + ' textarea').trigger('blur');
 		if (text.val() === '') {
 			$(this).parent().parent().remove();
+			pointerId--;
 			return ;
 		}
 		newPoint.text = text.val();
