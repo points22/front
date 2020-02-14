@@ -153,9 +153,9 @@ function load_points() {
 	loader = function(data) {
 		if(data.points) {
 			load(data.points)
-			if(data.more) {
-				getPoints(loader, data.points.length);
-			}
+			// if(data.more) {
+			// 	getPoints(loader, data.points.length);
+			// }
 		}
 	}
 
