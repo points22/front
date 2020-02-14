@@ -123,6 +123,11 @@ $('body').click(function (e) {
 //   }
 // });
 
+$('body').on('click', 'textarea', function(e){
+	e.stopPropagation();
+	$(this).trigger('blur');
+});
+
 $('body').on('click', '.pointer', function(e){
 	e.stopPropagation();
 
@@ -160,7 +165,6 @@ function load_points() {
 
 	getPoints(loader);
 }
-
 $(document).ready(function() {
 
 	if (!local && window.location.href.indexOf("https://") != 0) {
