@@ -106,6 +106,7 @@ function drawPoint(xPos, yPos, text) {
 		// }
 
 	$('#point-' + pointerId + ' textarea').val(text);
+	pointerId++;
 	}
 
 $('body').click(function (e) {
@@ -120,7 +121,6 @@ $('body').click(function (e) {
 	newPoint.text = null;
 	newPoint.pointerId = pointerId;
 
-	pointerId++;
 });
 
 // $('body').on('keypress',function(e) {
