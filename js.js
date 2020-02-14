@@ -131,7 +131,7 @@ $('body').on('blur', 'textarea',function(e) {
 	}
 	newPoint.text = text.val();
 	console.log(newPoint);
-	createPoint(newPoint);
+	//createPoint(newPoint);
 });
 
 $('body').on('click', '.pointer', function(e){
