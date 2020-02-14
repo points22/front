@@ -39,6 +39,16 @@ function getPoints(callback, offset, limit) {
 	if(limit) {
 		query.limit = limit
 	}
+	$('body').on('blur', 'textarea',function(e) {
+		let text = $(this)
+		// $('#point-' + (newPoint.pointerId - 1) + ' textarea').trigger('blur');
+		if (text.val() === '') {
+			return ;
+		}
+		newPoint.text = text.val();
+		console.log(newPoint);
+		createPoint(newPoint);
+	});
 	return get(`/point`, query, callback);
 }
 
@@ -123,16 +133,7 @@ $('body').click(function (e) {
 //   }
 // });
 
-$('body').on('blur', 'textarea',function(e) {
-	let text = $(this)
-	// $('#point-' + (newPoint.pointerId - 1) + ' textarea').trigger('blur');
-	if (text.val() === '') {
-		return ;
-	}
-	newPoint.text = text.val();
-	console.log(newPoint);
-	//createPoint(newPoint);
-});
+
 
 $('body').on('click', '.pointer', function(e){
 	e.stopPropagation();
