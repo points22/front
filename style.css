@@ -15,6 +15,9 @@ body {
 	overflow: hidden;
 }
 textarea {
+	outline: none;
+}
+textarea {
 	background: transparent;
 	position: absolute;
     top: -11px;
