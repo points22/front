@@ -76,7 +76,7 @@ def get_points():
 
     return jsonify({
         'points': points,
-        'more': len(points) < total,
+        'more': offset + len(points) < total,
         'result': True,
     })
 

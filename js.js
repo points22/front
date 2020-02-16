@@ -146,26 +146,33 @@ function load_points() {
 		});
 		pointerId++;
 		console.log('loaded points');
-	$('body').on('blur', 'textarea',function(e) {
-		let text = $(this)
-		// $('#point-' + (newPoint.pointerId - 1) + ' textarea').trigger('blur');
-		if (text.val() === '') {
-			$(this).parent().parent().remove();
-			pointerId--;
-			return ;
-		}
-		newPoint.text = text.val();
-		console.log(newPoint);
-		createPoint(newPoint);
-	});
+
+		$('body').on('blur', 'textarea',function(e) {
+			let text = $(this)
+			// $('#point-' + (newPoint.pointerId - 1) + ' textarea').trigger('blur');
+			if (text.val() === '') {
+				$(this).parent().parent().remove();
+				pointerId--;
+				return ;
+			}
+			newPoint.text = text.val();
+			console.log(newPoint);
+			createPoint(newPoint);
+		});
 	}
 
+	var offset = 0
+
 	loader = function(data) {
+		if(!data.result) {
+			alert(`Server error loading points (offset ${offset})`)
+		}
 		if(data.points) {
 			load(data.points)
-			// if(data.more) {
-			// 	getPoints(loader, data.points.length);
-			// }
+			if(data.more) {
+				offset += data.points.length
+				getPoints(loader, offset);
+			}
 		}
 	}
 
