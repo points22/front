@@ -9,6 +9,7 @@ import smtplib, ssl
 from email.message import EmailMessage
 from numpy.random import randint, seed
 import time
+import datetime
 
 seed(int(time.time()))
 
@@ -139,8 +140,8 @@ def auth_start():
     res['result'] = True
 
     resp = jsonify(res)
-    resp.set_cookie('_email', user['email'], domain=COOKIE_DOMAIN)
-    resp.set_cookie('_id', str(user['_id']), domain=COOKIE_DOMAIN)
+    set_cookie(resp, '_email', user['email'], domain=COOKIE_DOMAIN)
+    set_cookie(resp, '_id', str(user['_id']), domain=COOKIE_DOMAIN)
     return resp
 
 @app.route('/auth_finish')
@@ -176,8 +177,13 @@ def auth_finish():
 
     res['result'] = True
     resp = jsonify(res)
-    resp.set_cookie('_auth', 'ok', domain=COOKIE_DOMAIN)
+    set_cookie(resp, '_auth', 'ok', domain=COOKIE_DOMAIN)
     return resp
+
+def set_cookie(resp, *args, **kwargs):
+    expire_date = datetime.datetime.now()
+    expire_date = expire_date + datetime.timedelta(days=7)
+    resp.set_cookie(*args, **kwargs, expires=expire_date)
 
 def send_email(email, text):
     try:
